@@ -1,7 +1,7 @@
 ---
 - block:
   - name: Get list of directories needed
-    set_fact:
+    ansible.builtin.set_fact:
       list_of_dirs: "{{ (list_of_dirs | default ([]) + [ item.dest_file|dirname ]) | unique }}"
     loop: "{{ download_geturl_options }}"
     loop_control:
@@ -9,14 +9,14 @@
     when: item is defined
 
   - name: Ensure directories needed exist
-    file:
+    ansible.builtin.file:
       name: "{{ item }}"
       state: directory
     loop: "{{ list_of_dirs }}"
     when: list_of_dirs is defined
 
   - name: Download files
-    get_url:
+    ansible.builtin.get_url:
       url: "{{ item.url }}"
       dest: "{{ item.dest_file }}"
       mode: "{{ item.mode | default(omit) }}"
@@ -34,31 +34,31 @@
 
 - block:
   - name: Get list of directories needed
-    set_fact:
+    ansible.builtin.set_fact:
       list_of_archive_dirs: "{{ (list_of_archive_dirs|default ([]) + [ item.dest_folder ])|unique }}"
     loop: "{{ download_geturl_archive_options }}"
     loop_control:
       label: "{{ item.dest_folder }}"
 
   - name: Ensure directories needed exist
-    file:
+    ansible.builtin.file:
       name: "{{ item }}"
       state: directory
     loop: "{{ list_of_archive_dirs }}"
     when: list_of_archive_dirs is defined
 
   - name: Ensure unzip and gtar is installed
-    package:
+    ansible.builtin.package:
       name: "{{ download_archive_packages }}"
       state: present
 
   - name: Create temporary dir
-    file:
+    ansible.builtin.file:
       path: /tmp/ansible_download_tmp
       state: directory
 
   - name: Download temporary files
-    get_url:
+    ansible.builtin.get_url:
       url: "{{ item.url }}"
       dest: "/tmp/ansible_download_tmp/{{ item.url | basename }}"
       force: "{{ item.force | default('no') | bool }}"
@@ -71,7 +71,7 @@
       label: "{{ item.url }} => /tmp/ansible_download_tmp/{{ item.url | basename }}"
 
   - name: Unpack archives
-    unarchive:
+    ansible.builtin.unarchive:
       src: "/tmp/ansible_download_tmp/{{ item.url | basename }}"
       dest: "{{ item.dest_folder }}"
       mode: "{{ item.mode | default(omit) }}"
